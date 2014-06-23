@@ -108,6 +108,15 @@ box.  The steps you need to do are:
 1. Update the box
 2. Install git on the box
 3. Get rvm
+4. Get the EOL code base
+5. Install the required version of Ruby
+6. Add some more important packages
+7. Install MySQL
+8. Get your EOL gems
+9. Setup virtuoso
+10. Install redis
+11. Get EOL Private Config
+12. Setup EOL
 
 ==== Update the box
 
@@ -117,7 +126,7 @@ This will bring the operating system on the generic box up to date in terms of s
   % vagrant ssh
   % sudo apt-get update
 
-2. Install git on the box
+==== Install git on the box
 
 Now you have to install and reconfigure git on the VM:
 
@@ -126,7 +135,7 @@ Now you have to install and reconfigure git on the VM:
   % git config --global user.name "Your Full Name"
   % git config --global user.email "Your Email Address"
 
-3. Get rvm
+==== Get rvm
 
   # Vagrant
   % sudo apt-get install curl
@@ -135,7 +144,7 @@ Now you have to install and reconfigure git on the VM:
 
 Note that you should exit any shells you have on the VM so that they can correctly pickup the rvm shell functions.
 
-4. Get the EOL code base
+==== Get the EOL code base
 
   # Local Host
   % vagrant ssh
@@ -144,18 +153,19 @@ Note that you should exit any shells you have on the VM so that they can correct
   % cd $ROOT
   % git clone https://github.com/EOL/eol.git
 
-5. Install the required version of Ruby
+==== Install the required version of Ruby
 
   # Vagrant
   % RUBY_VERSION=`cat $ROOT/eol/.ruby-version`
   % rvm install $RUBY_VERSION
 
-6. Add some more important packages
+==== Add some more important packages
 
   # Vagrant
-  % sudo apt-get install build-essential default-jre memcached flex gperf libqt4-dev libxslt-dev libxml2-
+  % sudo apt-get install build-essential default-jre memcached flex gperf \
+    libqt4-dev libxslt-dev libxml2-dev
 
-7. Install MySQL
+==== Install MySQL
 
   # Vagrant
   % sudo apt-get install mysql-server mysql-client libmysqlclient-dev
@@ -178,13 +188,13 @@ Now edit your database.yml file to add the mysql password:
 
   % $EDITOR $ROOT/eol/config/database.yml
 
-8. Get your EOL gems
+==== Get your EOL gems
 
   # Vagrant
   % cd $ROOT/eol
   % bundle install
 
-9. Setup virtuoso
+==== Setup virtuoso
 
   # Vagrant
   % git clone https://github.com/openlink/virtuoso-opensource.git /tmp/virtuoso-opensource
@@ -236,13 +246,12 @@ This will start an interactive command-line session with Virtuoso.  In this envi
   GRANT EXECUTE ON DB.DBA.SPARQL_DELETE_DICT_CONTENT TO "SPARQL";
   quit;
 
-10. Install redis
+==== Install redis
 
   # Vagrant
   % sudo apt-get install redis-server
 
-11. Get EOL Private Config
-=== Get EOL Private Config
+==== Get EOL Private Config
 
 Currently this requires you have access to the private mbl-cli GitHub
 community. We plan to at least make this step unnecessary to get the tests
@@ -265,7 +274,7 @@ Once the ssh key is setup run:
   % cd $ROOT/eol
   % rake eol:site_specific repo=git@github.com:mbl-cli/eol-private.git
 
-12. Setup EOL
+==== Setup EOL
 
   # Vagrant
   % cd $ROOT/eol
