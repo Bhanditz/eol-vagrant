@@ -1,0 +1,279 @@
+= Encyclopedia of Life - Vagrant Environment
+
+=== www.eol.org
+
+== INTRODUCTION
+
+Welcome to the Encyclopedia of Life project.  This project contains the minimal stuff needed to get
+the Vagrant version of the code working.  This repo should be checked out on the host operating
+system for the VirtualBox VM that will contain the EOL code.
+
+== LICENSE
+
+The full code base is released under the MIT License.  Details are available in the "LICENSE" file at
+the root of the code folder.
+
+== GETTING STARTED
+
+Using Vagrant is the fastest way we know of getting a working version of the EOL code base
+going.  It uses a pre-configured Vagrant box to shortcut much of the configuration work needed
+to get the EOL code base working locally.
+
+=== INSTALLATION
+
+To get things up and running, these are the steps you need to take.  If you 
+actually run through this process, please update this list with any changes 
+you find necessary!
+
+Note that some of these steps require administrator access on your machine.
+
+Also most of this process will be run from a command line.  On Macs you can use
+the Terminal application which should be in your Applications => Utilities folder.
+On Windows machines you can use puTTY (http://www.putty.org/).  On Linux machines
+it depends a bit on the distro you are using, but we expect you'll know how to get
+to a command line.  Below commands are in boxes and indicated by an initial '%'
+shell prompt which should *not* be typed in.  You will be switching between the
+local host command line and the Vagrant machine command line a bit.  Any section
+that needs to be on the Vagrant machine will start with:
+
+  # Vagrant
+
+Sections that start on the local host will start with:
+
+  # Local Host
+
+If you are working through this in order, it will not be necessary
+to exit and restart enter vagrant each time, but there is at least one spot where
+that is necessary.  To get from the vagrant host to the local host give the command:
+
+  % exit
+
+=== FIRST THINGS FIRST
+
+Things you need to do:
+
+1. Setup VirtualBox
+2. Install Vagrant
+3. Install Git
+4. Git the Vagrantfile
+5. Run 'vagrant up'
+
+==== Setup VirtualBox
+
+Go to https://www.virtualbox.org/wiki/Downloads and download the appropriate version of VirtualBox.
+Follow the installation instructions, but don't worry about actually running the application.
+
+==== Install Vagrant
+
+Go to http://www.vagrantup.com/downloads.html and download the appropriate version of Vagrant.
+Follow the installation instructions.
+
+==== Install Git
+
+Get a reasonably recent version of the command line version of Git.  This may already be installed
+on your machine or you may need to go somewhere like http://github.com and follow their instructions
+to get it installed.  Note that you will want probably want an account on GitHub if you don't already
+have one.  You will probably want to configure git with these commands:
+
+  # Local Host
+  % git config --global user.name "Your Full Name"
+  % git config --global user.email "Your Email Address”
+
+==== Git the Vagrantfile
+
+  # Local Host
+  % git clone https://github.com/EOL/eol-vagrant.git
+
+is the easiest approach. However, if you also may want to setup SSH access to GitHub as described here:
+help.github.com/articles/generating-ssh-keys
+
+==== Run 'vagrant up'
+
+  # Local Host
+  % cd eol-vagrant
+  % vagrant up
+
+This should create a Vagrant VM on your local host.  Once it completes you should be able to access it with:
+
+  % vagrant ssh
+
+You may want to go into the VirtualBox application at this point and just verify that the VM has 2G of memory.
+
+=== Configuring Your New Vagrant Box
+
+Currently the eol-vagrant Vagrantfile uses a very generic box.  We plan to make an EOL specific box available
+that will shortcut many of the following steps.  However, this list will still be useful for rebuilding the
+box.  The steps you need to do are:
+
+1. Update the box
+2. Install git on the box
+3. Get rvm
+
+==== Update the box
+
+This will bring the operating system on the generic box up to date in terms of security patches etc.
+
+  # Local Host
+  % vagrant ssh
+  % sudo apt-get update
+
+2. Install git on the box
+
+Now you have to install and reconfigure git on the VM:
+
+  # Vagrant
+  % sudo apt-get install git
+  % git config --global user.name "Your Full Name"
+  % git config --global user.email "Your Email Address"
+
+3. Get rvm
+
+  # Vagrant
+  % sudo apt-get install curl
+  % curl -L https://get.rvm.io | bash -s stable
+  % exit
+
+Note that you should exit any shells you have on the VM so that they can correctly pickup the rvm shell functions.
+
+4. Get the EOL code base
+
+  # Local Host
+  % vagrant ssh
+  % ROOT=~/git
+  % mkdir -p $ROOT
+  % cd $ROOT
+  % git clone https://github.com/EOL/eol.git
+
+5. Install the required version of Ruby
+
+  # Vagrant
+  % RUBY_VERSION=`cat $ROOT/eol/.ruby-version`
+  % rvm install $RUBY_VERSION
+
+6. Add some more important packages
+
+  # Vagrant
+  % sudo apt-get install build-essential default-jre memcached flex gperf libqt4-dev libxslt-dev libxml2-
+
+7. Install MySQL
+
+  # Vagrant
+  % sudo apt-get install mysql-server mysql-client libmysqlclient-dev
+
+The above will ask you set the password for the database. Remember this password
+for the next step.
+
+  # Vagrant
+  % mysql_secure_installation
+  % cp $ROOT/eol/config/database.sample.yml $ROOT/eol/config/database.yml
+
+The standard Unix textfile editor 'vi' should be available.  If you prefer the emacs editor you can install it
+with:
+
+  % sudo apt-get install emacs23
+
+The rest of this document assumes that $EDITOR is set to the editor of your choice.
+
+Now edit your database.yml file to add the mysql password:
+
+  % $EDITOR $ROOT/eol/config/database.yml
+
+8. Get your EOL gems
+
+  # Vagrant
+  % cd $ROOT/eol
+  % bundle install
+
+9. Setup virtuoso
+
+  # Vagrant
+  % git clone https://github.com/openlink/virtuoso-opensource.git /tmp/virtuoso-opensource
+  % cd /tmp/virtuoso-opensource
+  % CFLAGS="-O2 -m64"
+  % export CFLAGS
+  % ./autogen.sh --enable-maintainer-mode --prefix=/usr/local/ --with-readline --program-transform-name="s/isql/isql-vt/"
+  % ./configure --prefix=/usr/local/ --with-readline --program-transform-name="s/isql/isql-vt/"
+  % make
+  % sudo make install
+  % cd /usr/local/var/lib/virtuoso/db
+  % sudo virtuoso-t -d &
+  % sleep 15
+  % sudo killall virtuoso-t
+  % git clone https://github.com/mbl-cli/virtuoso-cookbook.git /tmp/virtuoso-cookbook
+  % cd /tmp/virtuoso-cookbook
+  % sudo cp templates/default/init.erb /etc/init.d/virtuoso
+  % sudo chmod 0755 /etc/init.d/virtuoso 
+  % sudo service virtuoso start
+  % curl -i -d "INSERT {<http://demo.openlinksw.com/DAV/home/demo_about.rdf>
+    <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+    <http://rdfs.org/sioc/ns#User>}" \
+    -u "dba:dba" -H "Content-Type: application/sparql-query" \
+    http://localhost:8890/DAV/home/dba/upload
+
+The response should be:
+
+  HTTP/1.1 201 Created
+  Server: Virtuoso/05.00.3023 (Win32) i686-generic-win-32  VDB
+  Connection: Keep-Alive
+  Content-Type: text/html; charset=ISO-8859-1
+  Date: Fri, 28 Dec 2007 12:50:12 GMT
+  Accept-Ranges: bytes
+  MS-Author-Via: SPARQL
+  Content-Length: 0
+
+Next, in a browser on your local host, go to http://localhost:8890/ => Conductor => LinkedData (login with dba/dba) => Graphs (blue tab) => Graphs (white tab) and check to see if there is a graph named http://localhost:8890%2FDAV%2Fdba%2Fupload
+...if so, delete it.
+
+  # Vagrant
+  % isql-vt 1111 dba dba
+
+This will start an interactive command-line session with Virtuoso.  In this environment give the following commands:
+
+  GRANT EXECUTE ON SPARUL_CLEAR TO "SPARQL";
+  GRANT EXECUTE ON DB.DBA.SPARUL_DROP TO "SPARQL";
+  GRANT DELETE ON DB.DBA.RDF_QUAD TO "SPARQL";
+  GRANT EXECUTE ON DB.DBA.SPARQL_INSERT_DICT_CONTENT TO "SPARQL";
+  GRANT EXECUTE ON DB.DBA.SPARQL_DELETE_DICT_CONTENT TO "SPARQL";
+  quit;
+
+10. Install redis
+
+  # Vagrant
+  % sudo apt-get install redis-server
+
+11. Get EOL Private Config
+=== Get EOL Private Config
+
+Currently this requires you have access to the private mbl-cli GitHub
+community. We plan to at least make this step unnecessary to get the tests
+passing.
+
+For now, you must then create an SSH key and register it on GitHub as
+described here: https://help.github.com/articles/generating-ssh-keys
+
+The short story is run:
+
+  # Vagrant
+  % ssh-keygen -t rsa -C "Your Email Address"
+
+And then copy the resulting ~/.ssh/id_rsa.pub into your SSH keys on GitHub.
+Note that the ssh-add command mentinoed in the GitHub docs is not necessary.
+
+Once the ssh key is setup run:
+
+  # Vagrant
+  % cd $ROOT/eol
+  % rake eol:site_specific repo=git@github.com:mbl-cli/eol-private.git
+
+12. Setup EOL
+
+  # Vagrant
+  % cd $ROOT/eol
+  % rake eol:site_specific repo=git@github.com:mbl-cli/eol-private.git
+  % rake db:create:all
+  % rake solr:start
+  % rake eol:db:recreate
+  % rake scenarios:load NAME=bootstrap
+  % rake eol:db:recreate RAILS_ENV=test
+  % rake scenarios:load NAME=bootstrap RAILS_ENV=test
+  % rake
