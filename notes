@@ -1,0 +1,84 @@
+# This needs to move into the README.md...
+Installed VirtualBox from https://www.virtualbox.org/
+Installed Vagrant from http://www.vagrantup.com
+Install git
+Get Vagrantfile (might end up in it's own repo or as part of the EOL/eol project)
+vagrant up
+# Check memory.  Give us 2G or give us death!
+vagrant ssh
+sudo apt-get update
+sudo apt-get install curl
+sudo apt-get install git
+git config --global user.name "Your Full Name"
+git config --global user.email "Your Email Address"
+curl -L https://get.rvm.io | bash -s stable
+exit
+vagrant ssh
+ROOT=~/git
+mkdir -p $ROOT
+cd $ROOT
+git clone https://github.com/EOL/eol.git
+RUBY_VERSION=`cat $ROOT/eol/.ruby-version`
+rvm install $RUBY_VERSION
+sudo apt-get install build-essential
+sudo apt-get install default-jre memcached flex gperf
+sudo apt-get install mysql-server mysql-client libmysqlclient-dev
+# Above will ask you set the password
+
+mysql_secure_installation
+cp $ROOT/eol/config/database.sample.yml $ROOT/eol/config/database.yml
+# sudo apt-get install emacs
+vi $ROOT/eol/config/database.yml # Add mysql password
+sudo apt-get install libqt4-dev libxslt-dev libxml2-dev
+cd $ROOT/eol
+bundle install # --without assets
+
+# Get virtuoso going.  It is largely extracted from virtuoso-cookbook that we may be able to use instead
+git clone https://github.com/openlink/virtuoso-opensource.git /tmp/virtuoso-opensource
+cd /tmp/virtuoso-opensource
+CFLAGS="-O2 -m64"
+export CFLAGS
+./autogen.sh --enable-maintainer-mode --prefix=/usr/local/ --with-readline --program-transform-name="s/isql/isql-vt/"
+./configure --prefix=/usr/local/ --with-readline --program-transform-name="s/isql/isql-vt/"
+make
+sudo make install
+cd /usr/local/var/lib/virtuoso/db
+sudo virtuoso-t -d &
+sleep 15
+sudo killall virtuoso-t
+git clone https://github.com/mbl-cli/virtuoso-cookbook.git /tmp/virtuoso-cookbook
+cd /tmp/virtuoso-cookbook
+sudo cp templates/default/init.erb /etc/init.d/virtuoso
+sudo chmod 0755 /etc/init.d/virtuoso 
+sudo service virtuoso start
+curl -i -d "INSERT {<http://demo.openlinksw.com/DAV/home/demo_about.rdf>
+  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+  <http://rdfs.org/sioc/ns#User>}" \
+  -u "dba:dba" -H "Content-Type: application/sparql-query" \
+  http://localhost:8890/DAV/home/dba/upload
+# Delete bogus graph through Conductor.  Should find an API way to do this.
+isql-vt 1111 dba dba
+GRANT EXECUTE ON SPARUL_CLEAR TO "SPARQL"; **** Note added ';' ****
+GRANT EXECUTE ON DB.DBA.SPARUL_DROP TO "SPARQL";
+GRANT DELETE ON DB.DBA.RDF_QUAD TO "SPARQL";
+GRANT EXECUTE ON DB.DBA.SPARQL_INSERT_DICT_CONTENT TO "SPARQL";
+GRANT EXECUTE ON DB.DBA.SPARQL_DELETE_DICT_CONTENT TO "SPARQL";
+quit;
+
+# Redis
+sudo apt-get install redis-server
+
+# Setup .ssh and Vagrant machine, don't worry about ssh-add
+ssh-keygen -t rsa -C "your_email@example.com"
+Install  in GitHub
+
+# EOL setup
+cd $ROOT/eol
+rake db:create:all
+rake eol:site_specific repo=git@github.com:mbl-cli/eol-private.git
+rake solr:start
+rake eol:db:recreate
+rake scenarios:load NAME=bootstrap
+rake eol:db:recreate RAILS_ENV=test
+rake scenarios:load NAME=bootstrap RAILS_ENV=test
+rake
