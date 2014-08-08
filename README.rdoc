@@ -106,7 +106,7 @@ verify that the VM has 2G of memory.
 
 ==== Start Solr
 
-  % rake solr:start
+  % cd ~/git/eol; rake solr:start
   
 ==== Run the tests
 
