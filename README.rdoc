@@ -101,8 +101,8 @@ verify that the VM has 2G of memory.
 ==== Make Sure You Have the Latest Code
 
   # Vagrant
-  % cd ~/git/eol; git pull
-  % cd ~/git/eol_php_code; git pull
+  % cd ~/git/eol; git pull; bundle install
+  % cd ~/git/eol_php_code; git pull; bundle install
 
 ==== Start Solr
 
