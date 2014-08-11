@@ -32,10 +32,10 @@ use the Terminal application which should be in your Applications =>
 Utilities folder. On Windows machines you can use puTTY
 (http://www.putty.org/).  On Linux machines it depends a bit on the 
 distribution you are using, but we expect you'll know how to get to a command 
-line.  Below commands are in boxes and indicated by an initial '%' shell 
-prompt which should *not* be typed in.  You will be switching between the
-local host command line and the Vagrant machine command line a bit.  Any 
-section that needs to be on the Vagrant machine will start with:
+line.  Below commands are in boxes and lines that start with '#' are comments
+which should *not* be typed in.  You will be switching between the local host 
+command line and the Vagrant machine command line a bit.  Any section that 
+needs to be on the Vagrant machine will start with:
 
   # Vagrant
 
@@ -47,7 +47,7 @@ If you are working through this in order, it will not be necessary to exit
 and connect to vagrant each time, but there is at least one spot where that 
 is necessary.  To get from the vagrant host to the local host give the command:
 
-  % exit
+  exit
 
 == LICENSE
 
@@ -80,52 +80,102 @@ version of Vagrant. Follow the installation instructions.
 ==== Install Git
 
 Get a reasonably recent version of the command line version of Git. This may 
-already be installed on your machine or you may need to go somewhere like 
-http://github.com and follow their instructions to get it installed.
+already be installed on your machine or you may need to download and install it
+from the web. We recommend creating an account at http://github.com and
+and following their instructions to get Git installed.
 
 ==== Git the Vagrant box for EOL Environment
 
-  # Local Host
-  % git clone https://github.com/EOL/eol-vagrant.git
+Once Git is installed we recommend creating a directory for checking out
+git repositories, say ~/git, but it can go anywhere.
 
-is the easiest approach. However, you may want to setup SSH access to GitHub 
-as described here: help.github.com/articles/generating-ssh-keys and clone it
-using the SSH version.
+  # Local Host
+  mkdir ~/git; cd ~/git
+
+Now checkout this repo.  It is very small (~6K, yes K).
+
+  git clone https://github.com/EOL/eol-vagrant.git
+
+is the easiest approach. However, advanced git users may want to use SSH access
+to GitHub as described here: help.github.com/articles/generating-ssh-keys
 
 ==== Run 'vagrant up'
 
   # Local Host
-  % cd eol-vagrant
-  % vagrant up
+  cd eol-vagrant
+  vagrant up
 
-This should create a Vagrant VM on your local host.  The first you do this it 
-will download the Vagrant box which may take a while.  Once the command 
-completes you should be able to access the box with:
+This should create a Vagrant VM on your local host.  The first you do
+this it will download the Vagrant box which may take a while since it is
+close to 2G.  Once the command completes you should be able to access the
+box with:
 
-  % vagrant ssh
+  # Local Host
+  vagrant ssh
 
-You may want to go into the VirtualBox application at this point and just 
-verify that the VM has 2G of memory.
+This should respond with something like:
+
+  Welcome to Ubuntu 12.04.3 LTS (GNU/Linux 3.8.0-29-generic x86_64)
+  vagrant@vagrant:~$ 
 
 ==== Make Sure You Have the Latest Code
 
   # Vagrant
-  % cd ~/git/eol; git pull; bundle install
-  % cd ~/git/eol_php_code; git pull; bundle install
+  cd ~/git/eol; git pull; bundle install
+  cd ~/git/eol_php_code; git pull; bundle install
+
+These may give a fair amount of output or simply respond with
+'Already up-to-date.' depending on how much work has been done on the
+EOL tools since the Vagrant box was last updated.
 
 ==== Start Solr
 
-  % cd ~/git/eol; rake solr:start
-  
+  cd ~/git/eol; rake solr:start
+
+This should respond with something:
+
+  ++ No config for environment_eol_org found, skipping.
+  ** LOADED: environments/local **
+  ++ No config for environments/development_eol_org found, skipping.
+  Connecting to database specified by database.yml
+  fix_rack_110_quote_parsing.rb not loaded
+  ** Starting Background Solr instance for EOL...
+  pid-file for killed process 2700 found (/home/vagrant/git/eol/solr/solr/eol-solr.pid), deleting.
+
 ==== Run the tests
 
-  # Vagrant
-  % cd ~/git/eol
-  % rake
-  % cd ~/git/eol_php_code
-  % php tests/run_tests.php
+To run the Ruby on Rails tests:
 
-In most cases this should complete with all tests passing. There are some
-subtle order dependencies that we have not fully worked out that can cause 
-failures. It is always worth running the tests a second time if there are
-failures to see if they just go away.
+  # Vagrant
+  cd ~/git/eol
+  rake
+
+This should generate a fair amount of output, but spend most of it's time at a
+line that looks something like:
+
+  1070/2141 |============================= 50 ============================>| Time: 00:12:44 
+
+Near the end there should be lines something like:
+
+  Finished in 25 minutes 45 seconds
+  2141 examples, 0 failures, 143 pending
+
+The key part of this are the '0 failures' and no errors should be reported.
+If this does not happen, first try running the tests again since we have seen
+cases of subtle order dependencies that we have not fully worked out and can
+cause failures. However, if the problems persist, please let us know through 
+the Github project.
+
+To run the PHP tests:
+
+  cd ~/git/eol_php_code
+  php tests/run_tests.php
+
+Again this should generate a fair amount of output, but the final lines should
+look something like:
+
+  Test cases run: 35/35, Passes: 974, Failures: 0, Exceptions: 0
+  Tests ran in 241.975136 seconds
+
+Again, if failures or exceptions are reported, please let us know through the
+Github project.
