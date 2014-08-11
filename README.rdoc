@@ -4,17 +4,26 @@
 
 == INTRODUCTION
 
-Welcome to the Encyclopedia of Life Vagrant project.  This project contains 
-the minimal stuff needed to get the Vagrant version of the code working.  This 
-repo should be checked out on the host operating system for the VirtualBox VM 
-that will contain the EOL code.  The following process relies on an existing 
-Vagrant box for EOL and is the fastest way for a new developer to a reasonably 
+Welcome to the Encyclopedia of Life Vagrant project. This project contains 
+the minimal stuff needed to get the Vagrant version of the code working.
+The following process should introduce all of the tools you need beyond a
+regular operating system to get the point where all the EOL tests are
+successfully passing.  If you run into any issues please record it here:
+
+https://github.com/EOL/eol-vagrant/issues (free account on github.com required)
+
+At the high level this process relies on an existing Vagrant box for EOL
+that has been pre-configured with all the needed tools. In essence you will
+download the tools to run and create the box, and then create it.  To the best
+of our knowledge this is the fastest way for a new developer to get a reasonably 
 recent version of the code setup and running the tests.  This process should 
 take less than half an hour from beginning to end and has been clocked at under 
 5 minutes if you have VirtualBox and Vagrant already setup.
 
-If you you are interested in the process for creating this Vagrant box, please
-go to https://github.com/EOL/eol-build-vagrant.
+If you are interested in the gory details regarding how the Vagrant box itself
+gets created, please go to:
+
+https://github.com/EOL/eol-build-vagrant.
 
 Note that some of the steps below require administrator access on your machine.
 
