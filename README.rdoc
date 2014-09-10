@@ -121,7 +121,7 @@ This should respond with something like:
 ==== Make Sure You Have the Latest Code
 
   # Vagrant
-  cd ~/git/eol; git pull; bundle install
+  cd ~/git/eol; git pull; bundle install; git db:migrate
   cd ~/git/eol_php_code; git pull; bundle install
 
 These may give a fair amount of output or simply respond with
