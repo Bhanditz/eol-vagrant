@@ -179,3 +179,35 @@ look something like:
 
 Again, if failures or exceptions are reported, please let us know through the
 Github project.
+
+==== Updating to a New Vagrant Box
+
+Each new EOL vagrant box should have a distinct name and when a new version is
+available the Vagrantfile in this project will be updated to get the new version.
+
+The safest way to get the latest vagrant box is to make a new clone of the
+eol-vagrant repository.
+
+If you want to reuse your current clone, then you should first destroy
+any existing box, then update your local repository, and then pick up
+this install process at the "Run 'vagrant up'" step.
+
+* THIS PROCESS WILL DESTROY ANY INFORMATION ON THE CURRENT VAGRANT BOX *
+
+To do this run:
+
+  # Local Host
+  vagrant destroy
+  git pull
+  vagrant up
+
+To be completely tidy you should also delete the old vagrant box.  You can find
+the old one with:
+
+  # Local Host
+  vagrant box list | grep eol-dev
+
+Then for any result other than the one listed in the Vagrantfile, run:
+
+  # Local Host
+  vagrant box remove <box>
